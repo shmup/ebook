@@ -1,16 +1,17 @@
 import { extname, join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
 const staticFiles = {
+  "/epub.min.js": {
+    path: "./epub.min.js",
+    contentType: "application/javascript",
+  },
   "/favicon.ico": { path: "./favicon.ico", contentType: "image/x-icon" },
   "/jszip.min.js": {
     path: "./jszip.min.js",
     contentType: "application/javascript",
   },
-  "/epub.min.js": {
-    path: "./epub.min.js",
-    contentType: "application/javascript",
-  },
   "/script.js": { path: "./script.js", contentType: "application/javascript" },
+  "/style.css": { path: "./style.css", contentType: "text/css" },
 };
 
 async function handler(req: Request): Promise<Response> {
@@ -46,40 +47,7 @@ async function handler(req: Request): Promise<Response> {
         <script src="/jszip.min.js"></script>
         <script src="/epub.min.js"></script>
         <script src="/script.js"></script>
-        <style>
-        body { background-color: #000000; color: #ffffff; }
-        #viewer { width: calc(100% - 50px); height: 100vh; padding: 25px; box-sizing: border-box; }
-        #keybindingsDialog {
-          max-width: 400px;
-          margin: auto;
-        }
-
-        .keybindings-content {
-          display: flex;
-          flex-direction: column;
-          background: #fff;
-          color: #000;
-        }
-
-        .keybindings-content ul {
-          list-style-type: none;
-          padding: 0;
-        }
-
-        .keybindings-content li {
-          margin-bottom: 8px;
-        }
-
-        kbd {
-          color: #000;
-          background-color: #fff;
-        }
-
-        #closeKeybindings {
-          align-self: flex-end;
-          cursor: pointer;
-        }
-        </style>
+        <link rel="stylesheet" href="/style.css">
       </head>
       <body>
         <div id="viewer"></div>
