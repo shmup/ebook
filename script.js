@@ -8,6 +8,8 @@ function initEpubReader(bookPath, initialLocation) {
     minSpreadWidth: 800,
   });
 
+  const storageKey = `epub-position-${bookPath.replace(/[^a-z0-9]/gi, '-')}`;
+
   rendition.themes.default({
     "body": {
       "color": "#ffffff",
@@ -29,22 +31,30 @@ function initEpubReader(bookPath, initialLocation) {
   book.ready.then(() => {
     if (initialLocation) {
       rendition.display(initialLocation);
-    } else {
-      rendition.display();
+    } 
+    else {
+      const savedPosition = localStorage.getItem(storageKey);
+      if (savedPosition) {
+        rendition.display(savedPosition);
+        updateLocationInUrl(savedPosition);
+      } else {
+        rendition.display();
+      }
     }
   });
 
   const viewer = document.getElementById("viewer");
 
-  // cfi = canonical fragment identifier
   function updateLocationInUrl(cfi) {
-    const newUrl = `${bookPath}/${encodeURIComponent(cfi)}`;
+    const newUrl = `${globalThis.location.pathname}?loc=${encodeURIComponent(cfi)}`;
     history.replaceState(null, "", newUrl);
   }
 
-  rendition.on("relocated", function (location) {
+  // cfi = canonical fragment identifier
+  rendition.on("relocated", function(location) {
     const cfi = location.start.cfi;
     updateLocationInUrl(cfi);
+    localStorage.setItem(storageKey, cfi);
   });
 
   function handleNavigation(x) {
@@ -58,7 +68,7 @@ function initEpubReader(bookPath, initialLocation) {
     }
   }
 
-  document.addEventListener("keyup", function (e) {
+  document.addEventListener("keyup", function(e) {
     if (e.keyCode == 37) rendition.prev();
     if (e.keyCode == 39) rendition.next();
   });
