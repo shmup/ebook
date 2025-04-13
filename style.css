@@ -1,33 +1,72 @@
-body { background-color: #000000; color: #ffffff; }
-#viewer { width: calc(100% - 50px); height: 100vh; padding: 25px; box-sizing: border-box; }
+body {
+  background-color: #000000;
+  color: #ffffff;
+}
+#viewer {
+  width: calc(100% - 50px);
+  height: 100vh;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
 #keybindingsDialog {
-  max-width: 400px;
+  max-width: 250px;
   margin: auto;
+  border: 1px solid #333;
+  padding: 0;
+  border: 1px solid #fff;
 }
 
 .keybindings-content {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  color: #000;
+  background: #111;
+  color: #eee;
+  padding: 5px 8px;
+  font-family: monospace;
+  font-size: 12px;
+
+  h3 {
+    margin: 0 0 10px 0;
+  }
 }
 
 .keybindings-content ul {
   list-style-type: none;
   padding: 0;
+  margin: 5px 0;
 }
 
 .keybindings-content li {
-  margin-bottom: 8px;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 kbd {
   color: #000;
   background-color: #fff;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 #closeKeybindings {
   align-self: flex-end;
   cursor: pointer;
+  background: #333;
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  outline: none;
 }
 
+#closeKeybindings:hover {
+  background: #444;
+}
