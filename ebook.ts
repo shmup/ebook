@@ -89,7 +89,12 @@ function generateHtml(content: string): string {
   <script src="/jszip.min.js"></script>
   <script src="/epub.min.js"></script>
   <style>
-    #viewer { width: 100%; height: 80vh; margin-top: 20px; }
+    #viewer {
+      width: calc(100% - 50px);
+      height: 100vh;
+      padding: 25px;
+      box-sizing: border-box;
+    }
   </style>
   </head>
   <body>
@@ -117,14 +122,33 @@ function generateDirectoryListing(dirPath: string, entries: Deno.DirEntry[]): st
 }
 
 function generateEpubViewer(bookPath: string): string {
-  return `<div id="viewer"></div>
+  return `
+  <div id="viewer"></div>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     var book = ePub("${bookPath}");
-    var rendition = book.renderTo("viewer", {width: "100%", height: "100%"});
+    var rendition = book.renderTo("viewer", {
+      width: "100%",
+      height: "100%",
+      flow: "paginated",
+      spread: "always",
+      minSpreadWidth: 800
+    });
+
     var displayed = rendition.display();
+
+    document.addEventListener("keyup", function(e) {
+      if (e.keyCode == 37) {
+        rendition.prev();
+      }
+      if (e.keyCode == 39) {
+        rendition.next();
+      }
+    });
   });
-  </script>`;
+  </script>
+  <style>
+  </style>`;
 }
 
 Deno.serve(handler);
