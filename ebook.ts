@@ -85,7 +85,7 @@ function generateHtml(content: string): string {
   <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>EPUB Reader</title>
+  <title>ebook</title>
   <script src="/jszip.min.js"></script>
   <script src="/epub.min.js"></script>
   <style>
