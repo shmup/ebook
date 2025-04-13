@@ -6,6 +6,10 @@ body {
 a {
   color: cyan;
   text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 #viewer {
@@ -75,4 +79,36 @@ kbd {
 
 #closeKeybindings:hover {
   background: #444;
+}
+
+.file-list {
+  max-width: 800px;
+}
+
+.file-header, .file-entry {
+  display: flex;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.file-header span, .file-entry a, .file-entry span {
+  display: inline-block;
+}
+
+.file-modified {
+  margin-left: auto;
+  text-align: right;
+  padding-right: 20px;
+  color: #aaa;
+}
+
+.file-size {
+  width: 80px;
+  text-align: right;
+  color: #aaa;
+}
+
+.file-header {
+  color: #888;
+  margin-bottom: 8px;
 }
