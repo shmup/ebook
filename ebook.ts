@@ -89,6 +89,10 @@ function generateHtml(content: string): string {
   <script src="/jszip.min.js"></script>
   <script src="/epub.min.js"></script>
   <style>
+    body {
+      background-color: #000000;
+      color: #ffffff;
+    }
     #viewer {
       width: calc(100% - 50px);
       height: 100vh;
@@ -133,6 +137,24 @@ function generateEpubViewer(bookPath: string): string {
       flow: "paginated",
       spread: "always",
       minSpreadWidth: 800
+    });
+
+    rendition.themes.default({
+      'body': {
+        'color': '#ffffff',
+        'background-color': '#000000'
+      },
+      'h1, h2, h3, h4, h5, h6': {
+        'color': '#dddddd'
+      },
+      'p': {
+        'color': '#ffffff',
+        'font-family': 'Arial, sans-serif',
+        'margin': '10px'
+      },
+      'a': {
+        'color': '#ff80ab'
+      }
     });
 
     var displayed = rendition.display();
