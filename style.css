@@ -2,6 +2,12 @@ body {
   background-color: #000000;
   color: #ffffff;
 }
+
+a {
+  color: cyan;
+  text-decoration: none;
+}
+
 #viewer {
   width: calc(100% - 50px);
   height: 100vh;

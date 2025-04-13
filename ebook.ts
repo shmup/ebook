@@ -96,7 +96,7 @@ async function handler(req: Request): Promise<Response> {
         <head>
           <meta charset="UTF-8" /><meta name="viewport" content="width=device-width" />
           <title>ebook</title>
-          <style>body { background-color: #000000; color: #ffffff; }</style>
+          <link rel="stylesheet" href="/style.css">
         </head>
         <body><div class="file-list">${listing}</div></body>
       </html>`;
