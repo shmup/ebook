@@ -170,4 +170,11 @@ function generateEpubViewer(bookPath: string, location?: string): string {
   </script>`;
 }
 
-Deno.serve(handler);
+const port = parseInt(Deno.args[0]) || 8083;
+
+Deno.serve({
+  port,
+  handler,
+});
+
+console.log(`Listening on http://localhost:${port}`);
