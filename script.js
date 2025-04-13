@@ -26,10 +26,8 @@ function initEpubReader(bookPath, initialLocation) {
     },
   });
 
-  // Store the current location
   book.ready.then(() => {
     if (initialLocation) {
-      // Try to restore from the saved location
       rendition.display(initialLocation);
     } else {
       rendition.display();
@@ -38,13 +36,12 @@ function initEpubReader(bookPath, initialLocation) {
 
   const viewer = document.getElementById("viewer");
 
-  // Update the URL with the current CFI
+  // cfi = canonical fragment identifier
   function updateLocationInUrl(cfi) {
     const newUrl = `${bookPath}/${encodeURIComponent(cfi)}`;
     history.replaceState(null, "", newUrl);
   }
 
-  // Listen to location changes
   rendition.on("relocated", function (location) {
     const cfi = location.start.cfi;
     updateLocationInUrl(cfi);
