@@ -8,7 +8,7 @@ function initEpubReader(bookPath, initialLocation) {
     minSpreadWidth: 800,
   });
 
-  const storageKey = `epub-position-${bookPath.replace(/[^a-z0-9]/gi, '-')}`;
+  const storageKey = `epub-position-${bookPath.replace(/[^a-z0-9]/gi, "-")}`;
 
   rendition.themes.default({
     "body": {
@@ -20,7 +20,7 @@ function initEpubReader(bookPath, initialLocation) {
     },
     "p": {
       "color": "#ffffff",
-      "font-family": "Arial, sans-serif",
+      "font-family": "serif",
       "margin": "10px",
     },
     "a": {
@@ -31,8 +31,7 @@ function initEpubReader(bookPath, initialLocation) {
   book.ready.then(() => {
     if (initialLocation) {
       rendition.display(initialLocation);
-    } 
-    else {
+    } else {
       const savedPosition = localStorage.getItem(storageKey);
       if (savedPosition) {
         rendition.display(savedPosition);
@@ -46,12 +45,14 @@ function initEpubReader(bookPath, initialLocation) {
   const viewer = document.getElementById("viewer");
 
   function updateLocationInUrl(cfi) {
-    const newUrl = `${globalThis.location.pathname}?loc=${encodeURIComponent(cfi)}`;
+    const newUrl = `${globalThis.location.pathname}?loc=${
+      encodeURIComponent(cfi)
+    }`;
     history.replaceState(null, "", newUrl);
   }
 
   // cfi = canonical fragment identifier
-  rendition.on("relocated", function(location) {
+  rendition.on("relocated", function (location) {
     const cfi = location.start.cfi;
     updateLocationInUrl(cfi);
     localStorage.setItem(storageKey, cfi);
@@ -68,10 +69,59 @@ function initEpubReader(bookPath, initialLocation) {
     }
   }
 
-  document.addEventListener("keyup", function(e) {
+  document.addEventListener("keyup", function (e) {
     if (e.keyCode == 37) rendition.prev();
     if (e.keyCode == 39) rendition.next();
+
+    const keyNum = parseInt(e.key, 10);
+
+    if (keyNum === 0) {
+      rendition.display(0);
+    } else if (keyNum >= 1 && keyNum <= 9) {
+      const spineLength = book.spine.length;
+      const spinePos = Math.floor(spineLength * (keyNum / 10));
+      rendition.display(
+        book.spine.get(Math.min(spinePos, spineLength - 1)).href,
+      );
+    }
+
+    // Show help modal when ? is pressed
+    if (e.key === "?") {
+      showKeybindingsModal();
+    }
   });
+
+  function showKeybindingsModal() {
+    // Create modal if it doesn't exist
+    let dialog = document.getElementById("keybindingsDialog");
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "keybindingsDialog";
+      dialog.innerHTML = `
+      <div class="keybindings-content">
+        <h3>keyboard shortcuts</h3>
+        <ul>
+          <li><kbd>← </kbd> previous</li>
+          <li><kbd>→</kbd> next</li>
+          <li><kbd>0-9</kbd> jump around</li>
+        </ul>
+        <button id="closeKeybindings">Close</button>
+      </div>
+    `;
+      document.body.appendChild(dialog);
+
+      // Add close button functionality
+      document.getElementById("closeKeybindings").addEventListener(
+        "click",
+        () => {
+          dialog.close();
+        },
+      );
+    }
+
+    // Show the modal
+    dialog.showModal();
+  }
 
   rendition.on("click", (e) => {
     handleNavigation(e.clientX);

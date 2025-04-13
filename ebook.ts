@@ -49,6 +49,36 @@ async function handler(req: Request): Promise<Response> {
         <style>
         body { background-color: #000000; color: #ffffff; }
         #viewer { width: calc(100% - 50px); height: 100vh; padding: 25px; box-sizing: border-box; }
+        #keybindingsDialog {
+          max-width: 400px;
+          margin: auto;
+        }
+
+        .keybindings-content {
+          display: flex;
+          flex-direction: column;
+          background: #fff;
+          color: #000;
+        }
+
+        .keybindings-content ul {
+          list-style-type: none;
+          padding: 0;
+        }
+
+        .keybindings-content li {
+          margin-bottom: 8px;
+        }
+
+        kbd {
+          color: #000;
+          background-color: #fff;
+        }
+
+        #closeKeybindings {
+          align-self: flex-end;
+          cursor: pointer;
+        }
         </style>
       </head>
       <body>
