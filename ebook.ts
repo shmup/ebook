@@ -1,23 +1,46 @@
-import { join, extname } from "https://deno.land/std@0.224.0/path/mod.ts";
+import { extname, join } from "https://deno.land/std@0.224.0/path/mod.ts";
+
+async function serveStaticFile(
+  filePath: string,
+  contentType: string,
+): Promise<Response> {
+  try {
+    const file = await Deno.readFile(filePath);
+    return new Response(file, {
+      headers: { "content-type": contentType },
+    });
+  } catch (e) {
+    console.error(e);
+    return new Response("File not found", { status: 404 });
+  }
+}
 
 async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const path = decodeURIComponent(url.pathname);
 
-  if (path === "/jszip.min.js" || path === "/epub.min.js") {
-    try {
-      const file = await Deno.readFile(`.${path}`);
-      const contentType = "application/javascript";
-      return new Response(file, {
-        headers: { "content-type": contentType },
-      });
-    } catch (e) {
-      console.error(e);
-      return new Response("File not found", { status: 404 });
-    }
+  const staticFiles: Record<string, { path: string; contentType: string }> = {
+    "/favicon.ico": { path: "./favicon.ico", contentType: "image/x-icon" },
+    "/jszip.min.js": {
+      path: "./jszip.min.js",
+      contentType: "application/javascript",
+    },
+    "/epub.min.js": {
+      path: "./epub.min.js",
+      contentType: "application/javascript",
+    },
+    "/script.js": {
+      path: "./script.js",
+      contentType: "application/javascript",
+    },
+  };
+
+  if (path in staticFiles) {
+    const fileInfo = staticFiles[path as keyof typeof staticFiles];
+    return serveStaticFile(fileInfo.path, fileInfo.contentType);
   }
 
-  if (path.endsWith('/') && path.toLowerCase().endsWith('.epub/')) {
+  if (path.endsWith("/") && path.toLowerCase().endsWith(".epub/")) {
     console.debug("generating epub viewer");
     const bookPath = path.slice(0, -1);
     const filePath = join("./epubs", bookPath.replace(/^\//, ""));
@@ -60,7 +83,9 @@ async function handler(req: Request): Promise<Response> {
       return new Response(file, {
         headers: {
           "content-type": "application/epub+zip",
-          "content-disposition": `attachment; filename="${path.split('/').pop()}"`
+          "content-disposition": `attachment; filename="${
+            path.split("/").pop()
+          }"`,
         },
       });
     }
@@ -70,7 +95,9 @@ async function handler(req: Request): Promise<Response> {
     return new Response(file, {
       headers: {
         "content-type": "application/octet-stream",
-        "content-disposition": `attachment; filename="${path.split('/').pop()}"`
+        "content-disposition": `attachment; filename="${
+          path.split("/").pop()
+        }"`,
       },
     });
   } catch (e) {
@@ -88,6 +115,7 @@ function generateHtml(content: string): string {
   <title>ebook</title>
   <script src="/jszip.min.js"></script>
   <script src="/epub.min.js"></script>
+  <script src="/script.js"></script>
   <style>
     body {
       background-color: #000000;
@@ -107,18 +135,23 @@ function generateHtml(content: string): string {
   </html>`;
 }
 
-function generateDirectoryListing(dirPath: string, entries: Deno.DirEntry[]): string {
-  const rows = entries.map(entry => {
-    const isEpub = entry.name.endsWith('.epub');
-    const entryPath = dirPath.endsWith('/') ? `${dirPath}${entry.name}` : `${dirPath}/${entry.name}`;
-    const link = isEpub ?
-      `<a href="${entryPath}/">📚</a>&nbsp;<a href="${entryPath}">${entry.name}</a>` :
-      entry.name;
+function generateDirectoryListing(
+  dirPath: string,
+  entries: Deno.DirEntry[],
+): string {
+  const rows = entries.map((entry) => {
+    const isEpub = entry.name.endsWith(".epub");
+    const entryPath = dirPath.endsWith("/")
+      ? `${dirPath}${entry.name}`
+      : `${dirPath}/${entry.name}`;
+    const link = isEpub
+      ? `<a href="${entryPath}/">📚</a>&nbsp;<a href="${entryPath}">${entry.name}</a>`
+      : entry.name;
 
     return `<div class="file-entry">
     ${link}
     </div>`;
-  }).join('\n');
+  }).join("\n");
 
   return `<div class="file-list">
     ${rows}
@@ -130,47 +163,9 @@ function generateEpubViewer(bookPath: string): string {
   <div id="viewer"></div>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
-    var book = ePub("${bookPath}");
-    var rendition = book.renderTo("viewer", {
-      width: "100%",
-      height: "100%",
-      flow: "paginated",
-      spread: "always",
-      minSpreadWidth: 800
-    });
-
-    rendition.themes.default({
-      'body': {
-        'color': '#ffffff',
-        'background-color': '#000000'
-      },
-      'h1, h2, h3, h4, h5, h6': {
-        'color': '#dddddd'
-      },
-      'p': {
-        'color': '#ffffff',
-        'font-family': 'Arial, sans-serif',
-        'margin': '10px'
-      },
-      'a': {
-        'color': '#ff80ab'
-      }
-    });
-
-    var displayed = rendition.display();
-
-    document.addEventListener("keyup", function(e) {
-      if (e.keyCode == 37) {
-        rendition.prev();
-      }
-      if (e.keyCode == 39) {
-        rendition.next();
-      }
-    });
+    initEpubReader("${bookPath}");
   });
-  </script>
-  <style>
-  </style>`;
+  </script>`;
 }
 
 Deno.serve(handler);
