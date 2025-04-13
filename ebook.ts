@@ -90,26 +90,38 @@ async function handler(req: Request): Promise<Response> {
         });
       }
 
-      const listing = entries.map((entry) => {
-        const isEpub = entry.name.endsWith(".epub");
-        const entryPath = path.endsWith("/")
-          ? `${path}${entry.name}`
-          : `${path}/${entry.name}`;
-        const formattedSize = formatFileSize(entry.size);
-        const formattedDate = entry.modified
-          ? new Date(entry.modified).toLocaleString()
-          : "";
+      const listing = entries
+        .sort((a, b) => {
+          if (a.isDirectory && b.isDirectory) {
+            return a.name.localeCompare(b.name);
+          } else if (a.isDirectory) {
+            return -1;
+          } else if (b.isDirectory) {
+            return 1;
+          } else {
+            return a.name.localeCompare(b.name);
+          }
+        })
+        .map((entry) => {
+          const isEpub = entry.name.endsWith(".epub");
+          const entryPath = path.endsWith("/")
+            ? `${path}${entry.name}`
+            : `${path}/${entry.name}`;
+          const formattedSize = formatFileSize(entry.size);
+          const formattedDate = entry.modified
+            ? new Date(entry.modified).toLocaleString()
+            : "";
 
-        return `<div class="file-entry">
+          return `<div class="file-entry">
       ${
-          isEpub
-            ? `<a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}">${entry.name}</a>`
-            : entry.name
-        }
+            isEpub
+              ? `<a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}">${entry.name}</a>`
+              : entry.name
+          }
       <span class="file-modified">${formattedDate}</span>
       <span class="file-size">${formattedSize}</span>
     </div>`;
-      }).join("\n");
+        }).join("\n");
 
       const html = `<!DOCTYPE html>
   <html lang="en">
