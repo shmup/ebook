@@ -73,19 +73,20 @@ function initEpubReader(bookPath, initialLocation) {
     if (e.keyCode == 37) rendition.prev();
     if (e.keyCode == 39) rendition.next();
 
-    const keyNum = parseInt(e.key, 10);
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+      const keyNum = parseInt(e.key, 10);
 
-    if (keyNum === 0) {
-      rendition.display(0);
-    } else if (keyNum >= 1 && keyNum <= 9) {
-      const spineLength = book.spine.length;
-      const spinePos = Math.floor(spineLength * (keyNum / 10));
-      rendition.display(
-        book.spine.get(Math.min(spinePos, spineLength - 1)).href,
-      );
+      if (keyNum === 0) {
+        rendition.display(0);
+      } else if (keyNum >= 1 && keyNum <= 9) {
+        const spineLength = book.spine.length;
+        const spinePos = Math.floor(spineLength * (keyNum / 10));
+        rendition.display(
+          book.spine.get(Math.min(spinePos, spineLength - 1)).href,
+        );
+      }
     }
 
-    // Show help modal when ? is pressed
     if (e.key === "?") {
       showKeybindingsModal();
     }
