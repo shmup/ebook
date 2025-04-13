@@ -1,3 +1,5 @@
+// https://github.com/futurepress/epub.js/tree/master/examples
+
 function initEpubReader(bookPath, initialLocation) {
   const book = ePub(bookPath);
   const rendition = book.renderTo("viewer", {
