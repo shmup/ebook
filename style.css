@@ -1,6 +1,8 @@
 body {
   background-color: #000000;
   color: #ffffff;
+  padding: 0;
+  margin: 0;
 }
 
 a {
@@ -82,7 +84,7 @@ kbd {
 }
 
 .file-list {
-  max-width: 800px;
+  max-width: 1024px;
 }
 
 .file-header, .file-entry {
