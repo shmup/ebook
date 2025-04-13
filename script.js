@@ -1,4 +1,4 @@
-function initEpubReader(bookPath) {
+function initEpubReader(bookPath, initialLocation) {
   const book = ePub(bookPath);
   const rendition = book.renderTo("viewer", {
     width: "100%",
@@ -26,8 +26,29 @@ function initEpubReader(bookPath) {
     },
   });
 
-  rendition.display();
+  // Store the current location
+  book.ready.then(() => {
+    if (initialLocation) {
+      // Try to restore from the saved location
+      rendition.display(initialLocation);
+    } else {
+      rendition.display();
+    }
+  });
+
   const viewer = document.getElementById("viewer");
+
+  // Update the URL with the current CFI
+  function updateLocationInUrl(cfi) {
+    const newUrl = `${bookPath}/${encodeURIComponent(cfi)}`;
+    history.replaceState(null, "", newUrl);
+  }
+
+  // Listen to location changes
+  rendition.on("relocated", function (location) {
+    const cfi = location.start.cfi;
+    updateLocationInUrl(cfi);
+  });
 
   function handleNavigation(x) {
     const width = globalThis.innerWidth;
@@ -45,7 +66,6 @@ function initEpubReader(bookPath) {
     if (e.keyCode == 39) rendition.next();
   });
 
-  // Note: I was only able to get a perfect click scenario with all 3 handlers
   rendition.on("click", (e) => {
     handleNavigation(e.clientX);
   });

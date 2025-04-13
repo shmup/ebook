@@ -40,15 +40,17 @@ async function handler(req: Request): Promise<Response> {
     return serveStaticFile(fileInfo.path, fileInfo.contentType);
   }
 
-  if (path.endsWith("/") && path.toLowerCase().endsWith(".epub/")) {
+  const epubPathMatch = path.match(/^(.*\.epub)\/(.+)?$/);
+  if (epubPathMatch) {
     console.debug("generating epub viewer");
-    const bookPath = path.slice(0, -1);
+    const bookPath = epubPathMatch[1];
+    const location = epubPathMatch[2] || undefined;
     const filePath = join("./epubs", bookPath.replace(/^\//, ""));
 
     try {
       const stat = await Deno.stat(filePath);
       if (stat.isFile) {
-        const html = generateHtml(generateEpubViewer(bookPath));
+        const html = generateHtml(generateEpubViewer(bookPath, location));
         return new Response(html, {
           headers: { "content-type": "text/html" },
         });
@@ -117,16 +119,16 @@ function generateHtml(content: string): string {
   <script src="/epub.min.js"></script>
   <script src="/script.js"></script>
   <style>
-    body {
-      background-color: #000000;
-      color: #ffffff;
-    }
-    #viewer {
-      width: calc(100% - 50px);
-      height: 100vh;
-      padding: 25px;
-      box-sizing: border-box;
-    }
+  body {
+    background-color: #000000;
+    color: #ffffff;
+  }
+  #viewer {
+    width: calc(100% - 50px);
+    height: 100vh;
+    padding: 25px;
+    box-sizing: border-box;
+  }
   </style>
   </head>
   <body>
@@ -149,21 +151,21 @@ function generateDirectoryListing(
       : entry.name;
 
     return `<div class="file-entry">
-    ${link}
-    </div>`;
+        ${link}
+        </div>`;
   }).join("\n");
 
   return `<div class="file-list">
-    ${rows}
+  ${rows}
   </div>`;
 }
 
-function generateEpubViewer(bookPath: string): string {
+function generateEpubViewer(bookPath: string, location?: string): string {
   return `
   <div id="viewer"></div>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
-    initEpubReader("${bookPath}");
+    initEpubReader("${bookPath}", ${location ? `"${location}"` : "undefined"});
   });
   </script>`;
 }
