@@ -78,52 +78,85 @@ async function handler(req: Request): Promise<Response> {
   try {
     const stat = await Deno.stat(filePath);
 
-    // Replace the directory listing section with this:
     if (stat.isDirectory) {
-      const entries = [];
-      for await (const entry of Deno.readDir(filePath)) {
-        const entryStats = await Deno.stat(join(filePath, entry.name));
-        entries.push({
-          ...entry,
-          size: entryStats.size,
-          modified: entryStats.mtime,
-        });
-      }
+      return handleDirectory(filePath, path);
+    }
 
-      const listing = entries
-        .sort((a, b) => {
-          if (a.isDirectory && b.isDirectory) {
-            return a.name.localeCompare(b.name);
-          } else if (a.isDirectory) {
-            return -1;
-          } else if (b.isDirectory) {
-            return 1;
-          } else {
-            return a.name.localeCompare(b.name);
-          }
-        })
-        .map((entry) => {
-          const isEpub = entry.name.endsWith(".epub");
-          const entryPath = path.endsWith("/")
-            ? `${path}${entry.name}`
-            : `${path}/${entry.name}`;
-          const formattedSize = formatFileSize(entry.size);
-          const formattedDate = entry.modified
-            ? new Date(entry.modified).toLocaleString()
-            : "";
+    const file = await Deno.readFile(filePath);
+    const filename = path.split("/").pop();
+    const isEpub = extname(filePath) === ".epub";
 
-          return `<div class="file-entry">
+    return new Response(file, {
+      headers: {
+        "content-type": isEpub
+          ? "application/epub+zip"
+          : "application/octet-stream",
+        "content-disposition": `attachment; filename="${filename}"`,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return new Response("Not found", { status: 404 });
+  }
+}
+
+async function handleDirectory(filePath: string, path: string): Promise<Response> {
+  const entries = [];
+  for await (const entry of Deno.readDir(filePath)) {
+    const entryStats = await Deno.stat(join(filePath, entry.name));
+    entries.push({
+      ...entry,
+      size: entryStats.size,
+      modified: entryStats.mtime,
+    });
+  }
+
+  const sortedEntries = entries.sort((a, b) => {
+    if (a.isDirectory && b.isDirectory) {
+      return a.name.localeCompare(b.name);
+    } else if (a.isDirectory) {
+      return -1;
+    } else if (b.isDirectory) {
+      return 1;
+    } else {
+      return a.name.localeCompare(b.name);
+    }
+  });
+
+  const html = generateDirectoryTemplate(sortedEntries, path);
+  return new Response(html, { headers: { "content-type": "text/html" } });
+}
+
+interface DirectoryEntry {
+  name: string;
+  isDirectory: boolean;
+  size: number;
+  modified: Date | null;
+}
+
+function generateDirectoryTemplate(entries: DirectoryEntry[], path: string): string {
+  const listing = entries.map((entry) => {
+    const isEpub = entry.name.endsWith(".epub");
+    const entryPath = path.endsWith("/")
+      ? `${path}${entry.name}`
+      : `${path}/${entry.name}`;
+    const formattedSize = formatFileSize(entry.size);
+    const formattedDate = entry.modified
+      ? new Date(entry.modified).toLocaleString()
+      : "";
+
+    return `<div class="file-entry">
       ${
-            isEpub
-              ? `<a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}">${entry.name}</a>`
-              : entry.name
-          }
+        isEpub
+          ? `<a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}">${entry.name}</a>`
+          : entry.name
+      }
       <span class="file-modified">${formattedDate}</span>
       <span class="file-size">${formattedSize}</span>
     </div>`;
-        }).join("\n");
+  }).join("\n");
 
-      const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" /><meta name="viewport" content="width=device-width" />
@@ -144,26 +177,6 @@ async function handler(req: Request): Promise<Response> {
       </div>
     </body>
   </html>`;
-
-      return new Response(html, { headers: { "content-type": "text/html" } });
-    }
-
-    const file = await Deno.readFile(filePath);
-    const filename = path.split("/").pop();
-    const isEpub = extname(filePath) === ".epub";
-
-    return new Response(file, {
-      headers: {
-        "content-type": isEpub
-          ? "application/epub+zip"
-          : "application/octet-stream",
-        "content-disposition": `attachment; filename="${filename}"`,
-      },
-    });
-  } catch (e) {
-    console.error(e);
-    return new Response("Not found", { status: 404 });
-  }
 }
 
 const port = parseInt(Deno.args[0]) || 8083;
