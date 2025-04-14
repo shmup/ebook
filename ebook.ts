@@ -129,6 +129,9 @@ async function handler(req: Request): Promise<Response> {
       <meta charset="UTF-8" /><meta name="viewport" content="width=device-width" />
       <title>ebook</title>
       <link rel="stylesheet" href="/style.css">
+      <style>
+        body { padding: 20px; }
+      </style>
     </head>
     <body>
       <div class="file-list">
