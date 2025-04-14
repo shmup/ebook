@@ -71,9 +71,11 @@ function initEpubReader(bookPath, initialLocation) {
     }
   }
 
-  document.addEventListener("keyup", function (e) {
-    if (e.keyCode == 37) rendition.prev();
-    if (e.keyCode == 39) rendition.next();
+  document.addEventListener("keydown", function (e) {
+    if (e.key === " " && !e.shiftKey) rendition.next();
+    if (e.key === " " && e.shiftKey) rendition.prev();
+    if (e.key === "ArrowRight") rendition.next();
+    if (e.key === "ArrowLeft") rendition.prev();
 
     if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
       const keyNum = parseInt(e.key, 10);
