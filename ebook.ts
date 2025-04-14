@@ -100,7 +100,10 @@ async function handler(req: Request): Promise<Response> {
   }
 }
 
-async function handleDirectory(filePath: string, path: string): Promise<Response> {
+async function handleDirectory(
+  filePath: string,
+  path: string,
+): Promise<Response> {
   const entries = [];
   for await (const entry of Deno.readDir(filePath)) {
     const entryStats = await Deno.stat(join(filePath, entry.name));
@@ -134,7 +137,10 @@ interface DirectoryEntry {
   modified: Date | null;
 }
 
-function generateDirectoryTemplate(entries: DirectoryEntry[], path: string): string {
+function generateDirectoryTemplate(
+  entries: DirectoryEntry[],
+  path: string,
+): string {
   const listing = entries.map((entry) => {
     const isEpub = entry.name.endsWith(".epub");
     const entryPath = path.endsWith("/")
@@ -147,10 +153,25 @@ function generateDirectoryTemplate(entries: DirectoryEntry[], path: string): str
 
     return `<div class="file-entry">
       ${
-        isEpub
-          ? `<a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}">${entry.name}</a>`
-          : entry.name
-      }
+      isEpub
+        ? `<div class="epub-link-container">
+              <a href="${entryPath}/">📚</a>&nbsp;&nbsp;<a href="${entryPath}" class="epub-link">${entry.name}
+                <svg viewBox="0 0 100 5" class="link-animation">
+                  <line x1="0" y1="2.5" x2="100" y2="2.5" stroke="rgb(50,50,50)" stroke-width="2" />
+                  <rect
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="5"
+                    fill="url(#line_color)"
+                    mask="url(#animated_line_mask)"
+                    class="animation-rect"
+                  />
+                </svg>
+              </a>
+            </div>`
+        : entry.name
+    }
       <span class="file-modified">${formattedDate}</span>
       <span class="file-size">${formattedSize}</span>
     </div>`;
@@ -164,6 +185,47 @@ function generateDirectoryTemplate(entries: DirectoryEntry[], path: string): str
       <link rel="stylesheet" href="/style.css">
       <style>
         body { padding: 20px; }
+
+        .epub-link-container {
+          position: relative;
+          display: inline-block;
+        }
+
+        .epub-link {
+          position: relative;
+          text-decoration: none;
+        }
+
+        .link-animation {
+          position: absolute;
+          bottom: 0px;
+          left: 0;
+          height: 5px;
+          width: 100%;
+          overflow: hidden;
+          opacity: 0;
+          transition: opacity 0.5s ease;
+        }
+
+        .epub-link:hover .link-animation {
+          opacity: 1;
+        }
+
+        .animation-rect {
+          animation: bounce-horizontal 1s linear infinite;
+        }
+
+        @keyframes bounce-horizontal {
+          0% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
       </style>
     </head>
     <body>
@@ -174,6 +236,17 @@ function generateDirectoryTemplate(entries: DirectoryEntry[], path: string): str
           <span class="file-size">Size</span>
         </div>
         ${listing}
+        <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1">
+          <defs>
+            <linearGradient id="line_color" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="rgba(85,0,255,1.0)" />
+              <stop offset="100%" stop-color="rgb(85,0,255,1.0)" />
+            </linearGradient>
+            <mask id="animated_line_mask">
+              <line x1="0" y1="2.5" x2="100" y2="2.5" stroke="white" stroke-width="2" />
+            </mask>
+          </defs>
+        </svg>
       </div>
     </body>
   </html>`;
