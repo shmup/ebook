@@ -13,21 +13,21 @@ function initEpubReader(bookPath, initialLocation) {
   const storageKey = `epub-position-${bookPath.replace(/[^a-z0-9]/gi, "-")}`;
 
   rendition.themes.default({
-    "body": {
-      "color": "#dddddd !important",
+    body: {
+      color: "#dddddd !important",
       "background-color": "#000000",
     },
     "h1, h2, h3, h4, h5, h6": {
-      "color": "#dddddd !important",
+      color: "#dddddd !important",
       "margin-bottom": "20px !important",
     },
-    "p": {
-      "color": "#dddddd !important",
+    p: {
+      color: "#dddddd !important",
       "font-family": "serif",
-      "margin": "10px",
+      margin: "10px",
     },
-    "a": {
-      "color": "#ff80ab !important",
+    a: {
+      color: "#ff80ab !important",
     },
   });
 
@@ -48,9 +48,9 @@ function initEpubReader(bookPath, initialLocation) {
   const viewer = document.getElementById("viewer");
 
   function updateLocationInUrl(cfi) {
-    const newUrl = `${globalThis.location.pathname}?loc=${
-      encodeURIComponent(cfi)
-    }`;
+    const newUrl = `${globalThis.location.pathname}?loc=${encodeURIComponent(
+      cfi,
+    )}`;
     history.replaceState(null, "", newUrl);
   }
 
@@ -97,35 +97,101 @@ function initEpubReader(bookPath, initialLocation) {
     }
   });
 
+  function buildTocHtml(items, level = 0) {
+    return items
+      .map((item) => {
+        if (level === 0) {
+          if (item.subitems && item.subitems.length > 0) {
+            return `<li class="toc-chapter">
+            <details>
+              <summary class="chapter-title" data-href="${item.href}">${
+                item.label
+              }</summary>
+              <ul class="toc-sublist">${buildTocHtml(
+                item.subitems,
+                level + 1,
+              )}</ul>
+            </details>
+          </li>`;
+          } else {
+            // For items without subitems, just use a simple link without details/summary
+            return `<li class="toc-chapter">
+            <a href="#" class="chapter-title" data-href="${item.href}">${item.label}</a>
+          </li>`;
+          }
+        } else {
+          // For sub-items (nested under chapters)
+          return `<li class="toc-level-${level}">
+          <a href="#" data-href="${item.href}">${item.label}</a>
+        </li>`;
+        }
+      })
+      .join("");
+  }
+
   function showKeybindingsModal() {
-    // Create modal if it doesn't exist
     let dialog = document.getElementById("keybindingsDialog");
     if (!dialog) {
       dialog = document.createElement("dialog");
       dialog.id = "keybindingsDialog";
+
       dialog.innerHTML = `
-      <div class="keybindings-content">
-        <h3>keyboard shortcuts</h3>
-        <ul>
-          <li><kbd>← </kbd> previous</li>
-          <li><kbd>→</kbd> next</li>
-          <li><kbd>0-9</kbd> jump around</li>
-        </ul>
-        <button id="closeKeybindings">Close</button>
-      </div>
+    <div class="keybindings-content">
+      <h3>keyboard shortcuts</h3>
+      <ul>
+        <li><kbd>←</kbd> previous</li>
+        <li><kbd>→</kbd> next</li>
+        <li><kbd>0-9</kbd> jump around</li>
+      </ul>
+      <h3>chapters</h3>
+      <ul id="toc-list" class="toc-list"></ul>
+      <button id="closeKeybindings">Close</button>
+    </div>
     `;
       document.body.appendChild(dialog);
 
-      // Add close button functionality
-      document.getElementById("closeKeybindings").addEventListener(
-        "click",
-        () => {
+      const tocList = dialog.querySelector("#toc-list");
+      book.loaded.navigation.then((nav) => {
+        const toc = nav.toc;
+
+        if (toc.length === 0) {
+          tocList.innerHTML = "<li>No chapters found</li>";
+        } else {
+          tocList.innerHTML = buildTocHtml(toc);
+
+          tocList.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", (e) => {
+              e.preventDefault();
+              rendition.display(link.dataset.href);
+            });
+          });
+
+          tocList.querySelectorAll(".chapter-title").forEach((title) => {
+            title.addEventListener("click", (e) => {
+              e.preventDefault();
+
+              if (title.dataset.href) {
+                rendition.display(title.dataset.href);
+              }
+
+              const details = title.closest("details");
+              if (details) {
+                setTimeout(() => {
+                  details.open = true;
+                }, 0);
+              }
+            });
+          });
+        }
+      });
+
+      document
+        .getElementById("closeKeybindings")
+        .addEventListener("click", () => {
           dialog.close();
-        },
-      );
+        });
     }
 
-    // Show the modal
     dialog.showModal();
   }
 

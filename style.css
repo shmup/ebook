@@ -22,7 +22,7 @@ a {
 }
 
 #keybindingsDialog {
-  max-width: 250px;
+  min-width: 400px;
   margin: auto;
   border: 1px solid #333;
   padding: 0;
@@ -113,4 +113,56 @@ kbd {
 .file-header {
   color: #888;
   margin-bottom: 8px;
+}
+
+.toc-chapter {
+  margin-bottom: 10px;
+}
+
+.chapter-title {
+  cursor: pointer;
+  font-weight: bold;
+  color: #55ffff;
+  padding: 3px 0;
+}
+
+details > summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+details > summary::after {
+  content: "+";
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+details[open] > summary::after {
+  content: "-";
+}
+
+.toc-sublist {
+  margin: 5px 0 8px 15px !important;
+  padding: 0 !important;
+  list-style-type: none;
+  border-left: 1px solid #333;
+}
+
+.toc-level-1 {
+  padding: 3px 0 3px 10px;
+  border-left: 1px solid transparent;
+}
+
+.toc-level-1:hover {
+  border-left: 1px solid #55ffff;
+}
+
+.toc-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px !important;
+  padding: 0 !important;
+  list-style-type: none;
 }
