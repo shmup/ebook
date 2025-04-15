@@ -204,11 +204,11 @@ function generateDirectoryTemplate(
           width: 100%;
           overflow: hidden;
           opacity: 0;
-          transition: opacity 0.5s ease;
+          transition: opacity 0.1s ease;
         }
 
         .epub-link:hover .link-animation {
-          opacity: 1;
+          opacity: 0;
         }
 
         .animation-rect {
