@@ -1,5 +1,31 @@
 // https://github.com/futurepress/epub.js/tree/master/examples
 
+function setupSomaFmPlayer(dialog) {
+  const audioButton = dialog.querySelector("#somaFmToggle");
+  let audioPlayer = null;
+
+  audioButton.addEventListener("click", () => {
+    if (!audioPlayer) {
+      audioPlayer = new Audio("https://ice6.somafm.com/dronezone-64-aac");
+      audioPlayer.addEventListener("playing", () => {
+        audioButton.innerHTML = "⏹️"; // Stop symbol
+        audioButton.title = "Stop Dronezone";
+      });
+      audioPlayer.play();
+    } else {
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+        audioButton.innerHTML = "⏹️"; // Stop symbol
+        audioButton.title = "Stop Dronezone";
+      } else {
+        audioPlayer.pause();
+        audioButton.innerHTML = "▶️"; // Play symbol
+        audioButton.title = "Play Dronezone";
+      }
+    }
+  });
+}
+
 function initEpubReader(bookPath, initialLocation) {
   const book = ePub(bookPath);
   const rendition = book.renderTo("viewer", {
@@ -137,18 +163,22 @@ function initEpubReader(bookPath, initialLocation) {
 
       dialog.innerHTML = `
     <div class="keybindings-content">
+      <button id="somaFmToggle" class="soma-toggle" title="Play Dronezone">▶️</button>
       <h3>keyboard shortcuts</h3>
       <ul>
         <li><kbd>←</kbd> previous</li>
         <li><kbd>→</kbd> next</li>
         <li><kbd>0-9</kbd> jump around</li>
       </ul>
+      
       <h3>chapters</h3>
       <ul id="toc-list" class="toc-list"></ul>
       <button id="closeKeybindings">Close</button>
     </div>
     `;
+
       document.body.appendChild(dialog);
+      setupSomaFmPlayer(dialog);
 
       const tocList = dialog.querySelector("#toc-list");
       book.loaded.navigation.then((nav) => {

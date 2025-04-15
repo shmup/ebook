@@ -87,13 +87,16 @@ kbd {
   max-width: 1024px;
 }
 
-.file-header, .file-entry {
+.file-header,
+.file-entry {
   display: flex;
   white-space: nowrap;
   line-height: 1.5;
 }
 
-.file-header span, .file-entry a, .file-entry span {
+.file-header span,
+.file-entry a,
+.file-entry span {
   display: inline-block;
 }
 
@@ -117,6 +120,7 @@ kbd {
 
 .toc-chapter {
   margin-bottom: 10px;
+  outline: 0;
 }
 
 .chapter-title {
@@ -124,6 +128,7 @@ kbd {
   font-weight: bold;
   color: #55ffff;
   padding: 3px 0;
+  outline: 0;
 }
 
 details > summary {
@@ -165,4 +170,17 @@ details[open] > summary::after {
   margin-bottom: 10px !important;
   padding: 0 !important;
   list-style-type: none;
+}
+
+.soma-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: 0;
 }
