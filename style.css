@@ -9,7 +9,9 @@ a {
   color: #55ffff;
   text-decoration: none;
 
-  &:hover {}
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 #viewer {

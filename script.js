@@ -14,19 +14,20 @@ function initEpubReader(bookPath, initialLocation) {
 
   rendition.themes.default({
     "body": {
-      "color": "#ffffff",
+      "color": "#dddddd !important",
       "background-color": "#000000",
     },
     "h1, h2, h3, h4, h5, h6": {
-      "color": "#dddddd",
+      "color": "#dddddd !important",
+      "margin-bottom": "20px !important",
     },
     "p": {
-      "color": "#ffffff",
+      "color": "#dddddd !important",
       "font-family": "serif",
       "margin": "10px",
     },
     "a": {
-      "color": "#ff80ab",
+      "color": "#ff80ab !important",
     },
   });
 
