@@ -1,8 +1,8 @@
 import { extname, join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
 const staticFiles = {
-  "/epub.min.js": {
-    path: "./epub.min.js",
+  "/epub.js": {
+    path: "./epub.js",
     contentType: "application/javascript",
   },
   "/favicon.ico": { path: "./favicon.ico", contentType: "image/x-icon" },
@@ -52,7 +52,7 @@ async function handler(req: Request): Promise<Response> {
         <meta name="viewport" content="width=device-width" />
         <title>ebook</title>
         <script src="/jszip.min.js"></script>
-        <script src="/epub.min.js"></script>
+        <script src="/epub.js"></script>
         <script src="/script.js"></script>
         <link rel="stylesheet" href="/style.css">
       </head>
